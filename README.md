@@ -89,4 +89,62 @@ You will receive an individual API Key for class assignments. To prevent acciden
    ```
 
 ## Troubleshooting
-- The Jupyter extension should install automatically. If you still cannot select a Python kernel on Jupyter Notebook: Go to the left sidebar >> **Extensions** >> search for **Jupyter** >> reload window (or reinstall it).   
+- The Jupyter extension should install automatically. If you still cannot select a Python kernel on Jupyter Notebook: Go to the left sidebar >> **Extensions** >> search for **Jupyter** >> reload window (or reinstall it).
+
+# Multi-file RAG — Streamlit + LangChain + Chroma
+
+Overview
+- Single-file Streamlit app (chat_with_pdf.py) for Retrieval-Augmented Generation (RAG).
+- Upload .txt/.md/.pdf files, index them with embeddings + Chroma, and chat with document content.
+- Supports multiple file uploads, chunking, debug view of retrieved chunks, and a model dropdown.
+
+Quick start (Codespace / devcontainer)
+1. Open the provided Codespace devcontainer (the template runs `.devcontainer/setup.sh` after creation).
+   - If setup didn't run, execute:
+     ```bash
+     bash .devcontainer/setup.sh
+     ```
+2. Set your API key (do NOT commit it):
+   ```bash
+   export API_KEY="sk-..."          # or OPENAI_API_KEY
+   export EMBEDDING_MODEL="openai.text-embedding-3-large"   # optional
+   export GEN_MODEL="openai.gpt-4o"                        # optional
+   ```
+3. Run the app:
+   ```bash
+   streamlit run chat_with_pdf.py --server.port 8501
+   $BROWSER http://127.0.0.1:8501
+   ```
+
+Files included
+- chat_with_pdf.py — main app (single-file).
+- data/RAG_source.txt, data/combined_transcript.txt — sample texts.
+- .devcontainer/setup.sh — installs extras (chromadb, langchain_chroma, etc.).
+
+Recommended settings (sidebar)
+- Chunk size: 800–1200 (default 1000)
+- Chunk overlap: 100–300 (default 200)
+- Retrieval top-k: 3–6 (default 4)
+- Model: choose a model you have access to from the dropdown (or use Custom)
+
+Notes & gotchas
+- PDF parsing uses pypdf/PyPDF2 and only extracts selectable text — scanned PDFs need OCR (not included).
+- The app no longer auto-restricts retrieval by filename. Use the "Show retrieved chunks" debug option to inspect which chunks were used.
+- Embedding model selection: set EMBEDDING_MODEL to a valid model id for your endpoint (examples: `openai.text-embedding-3-large`, `openai.text-embedding-3-small`).
+
+Changes from the template (high level)
+- Added model dropdown (with Custom option).
+- Removed automatic filename-based retrieval restriction and removed the sidebar multiselect for restricting sources.
+- Added deduplication of retrieved chunks, stricter system prompt and temperature=0.0 to reduce hallucination.
+- Added "Show retrieved chunks" debug expander for transparency.
+- Allowed embedding model via EMBEDDING_MODEL env var (defaults to `openai.text-embedding-3-large`).
+
+Testing suggestions
+1. Upload `data/RAG_source.txt` only and ask: "Summarize RAG_source.txt in 3 sentences."
+2. Enable "Show retrieved chunks", ask targeted questions to verify chunk grounding.
+3. Upload a PDF (text-based) and verify extracted content under debug view.
+
+Security
+- Never commit API keys. Use environment variables in Codespace or secret management.
+
+If anything breaks, paste the terminal/streamlit traceback and the contents of chat_with_pdf.py for quick help.
